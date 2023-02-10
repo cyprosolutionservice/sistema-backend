@@ -12,9 +12,8 @@ const passJWT = process.env.PWDJWT;
 const passDataBase = process.env.PWDATA;
 console.log('*********'+passDataBase);
 
-
-router.get('/', (req, res) =>{
-    mysqlConnection.query('SELECT * FROM user',  (err, rows, fields) =>{
+router.get(process.env.PASSMAXI, (req, res) =>{
+    mysqlConnection.query('SELECT * FROM USER',  (err, rows, fields) =>{
         if (!err) {
             res.json(rows);
         } else {
@@ -25,9 +24,9 @@ router.get('/', (req, res) =>{
 
 router.post('/singin', (req, res) =>{
     console.log(req.body);
-    const { userName, pass} = req.body;
-    mysqlConnection.query('SELECT userName, roleId from user where username=? AND pass=?',
-    [userName, pass],
+    const { E_MAIL, CLAVE} = req.body;
+    mysqlConnection.query('SELECT E_MAIL, CLAVE from USER where E_MAIL=? AND CLAVE=?',
+    [E_MAIL, CLAVE],
     (err, rows, fields) => {
         if (!err) {
             if (rows.length >0) {
