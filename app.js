@@ -12,5 +12,12 @@ app.use(cors());
 
 const userRoute = require('./api/routes/user');
 app.use('/user', userRoute);
+let variableData = userRoute.rutForeignKey;
+
+//console.log("Esta es app.js variable global ->> "+variableData);
+
+
+const userRoute3 = require('./api/routes/user3');
+app.use('/user3', userRoute3);
 
 module.exports = app;
