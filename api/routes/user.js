@@ -27,22 +27,34 @@ router.get(process.env.PASSMAXI, (req, res) =>{
     });
 });
 
+
+
 router.post('/singin', (req, res) => {
     const user = req.body;
   
     // Execute the first SQL statement to insert the user's details
-    const SELECTUSER = `SELECT E_MAIL, CLAVE, RUTEMP from USER where E_MAIL='${user.E_MAIL}' AND CLAVE='${user.CLAVE}'`;
-    mysqlConnection.query(SELECTUSER, (error, results) => {
-      if (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Server error' });
-      }
-      let data1 = JSON.stringify(results[0]);
+    const QUERY_SELECT_USER = `SELECT E_MAIL, CLAVE, RUTEMP from USER where E_MAIL='${user.E_MAIL}' AND CLAVE='${user.CLAVE}'`;
+    
+    mysqlConnection.query(QUERY_SELECT_USER, (error, results) => {
+        if (error) {
+            // Handle database errors
+            console.error('Error connecting to database: ' + error.stack);
+            res.status(500).send('Internal server error');
+            return;
+          }
+
+        if (results.length === 0) {
+        // Handle incorrect login credentials
+        res.status(401).send('Incorrect username or password');
+        return;
+        }
+
+        let data1 = JSON.stringify(results[0]);
         var parsedData = JSON.parse(data1);
         let Fk_data = parsedData.RUTEMP;
         const datos = {data1};
-        const options= { expiresIn: '10h' };
-        const token = jwt.sign(datos, passJWT, options);
+        const options= { expiresIn: '10h'};
+        const token = jwt.sign(datos, passJWT, { expiresIn: '20s' });
 
       // Execute the second SQL statement to retrieve the inserted user's details
       const SQLJoin = `SELECT BUSINESS.BASEDATOS FROM USER INNER JOIN BUSINESS ON BUSINESS.RUTEMP = USER.RUTEMP WHERE USER.RUTEMP='${Fk_data}'`
@@ -69,7 +81,7 @@ router.post('/singin', (req, res) => {
     //console.log(dbName);
     // Create connection pool for MySQL
     const pool = mysql.createPool({
-        connectionLimit: 10,
+        connectionLimit: 100,
         host: process.env.HOST,
         user: process.env.USER,
         password: process.env.PWDATA,
@@ -77,7 +89,7 @@ router.post('/singin', (req, res) => {
     });
     const {CLAVE} = req.body;
     
-    pool.query('SELECT NOMBRE, CLAVE, RUTEMP from USERS where CLAVE=?',
+    pool.query('SELECT NOMBRE, CLAVE, RUTEMP, ROL_ID from USERS where CLAVE=?',
     [CLAVE],
     (err, rows, fields) => {
         if (!err) {
@@ -91,6 +103,7 @@ router.post('/singin', (req, res) => {
                 const datos = {parsedData};
                 const options = { expiresIn: '10h' };
                 const token = jwt.sign(datos, passJWT, options);
+                // const token = jwt.sign(datos, passJWT, { expiresIn: '20s' });
                 //res.json({token});
                 res.json({token, parsedData});
             } else {
@@ -99,6 +112,33 @@ router.post('/singin', (req, res) => {
         } else {
             res.json('Error de Acceso');
             console.log(err);
+        }
+    }
+    )
+});
+
+router.post('/create', (req, res) =>{
+    let dbName = req.headers[process.env.HARD_HEADER];
+    let rut = req.headers['rut_id'];
+    //console.log('ESTE ES EL RUT--'+rut);
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 10,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+    const { NOMBRE, APELLIDO, CLAVE, ROL_ID} = req.body;
+    
+    pool.query('INSERT INTO USERS (NOMBRE, APELLIDO, CLAVE, ROL_ID, RUTEMP) VALUES (?, ?, ?, ?, ?)',
+    [NOMBRE, APELLIDO, CLAVE, ROL_ID, rut],
+    (err, rows, fields) => {
+        if (!err) {
+            console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+        } else {
+            res.json('Error al Crear Usuario');
+            console.log("El error es -> "+ err.sqlMessage);
         }
     }
     )
