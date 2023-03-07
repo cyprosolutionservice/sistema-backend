@@ -147,6 +147,65 @@ router.post('/create', (req, res) =>{
     )
 });
 
+router.put('/edit/:id', (req, res) =>{
+    let dbName = req.headers[process.env.HARD_HEADER];
+    let id = req.params.id;
+    console.log('ESTE ES EL ID--'+id);
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 10,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+    const { NOMBRE, APELLIDO, CLAVE, ROL_ID, E_MAIL, ACTIVO} = req.body;
+    let activo = 1;
+    
+    pool.query(`UPDATE USERS SET NOMBRE=?, APELLIDO=?, CLAVE=?, ROL_ID=?, E_MAIL=?, ACTIVO=? WHERE CODUSUARIO=?`,
+    [NOMBRE, APELLIDO, CLAVE, ROL_ID, E_MAIL, ACTIVO, id],
+    (err, rows, fields) => {
+        if (!err) {
+            // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+            res.status(200).json('Usuario Actualizado Con Exito!!');
+        } else {
+            // res.json('Error al Crear Usuario');
+            res.status(400).json('¡ERROR! No se pudo Actualizar el Usuario');
+            console.log("El error es -> "+ err.sqlMessage);
+        }
+    }
+    )
+});
+
+router.get('/get/:id', (req, res) =>{
+    let dbName = req.headers[process.env.HARD_HEADER];
+    let id = req.params.id;
+    console.log('ESTE ES EL ID--'+id);
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 10,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+    
+    pool.query(`SELECT * FROM USERS WHERE CODUSUARIO=?`,
+    [id],
+    (err, rows, fields) => {
+        if (!err) {
+            // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+            // let data = JSON.stringify(rows[0]);
+            res.status(200).json(rows[0]);
+        } else {
+            // res.json('Error al Crear Usuario');
+            res.status(400).json('¡ERROR! No se pudo Obtener el Usuario');
+            console.log("El error es -> "+ err.sqlMessage);
+        }
+    }
+    )
+});
+
 router.get('/v1/obtener/usuarios', (req, res) =>{
     let dbName = req.headers[process.env.HARD_HEADER];
     let rut = req.headers['rut_id'];
@@ -160,7 +219,7 @@ router.get('/v1/obtener/usuarios', (req, res) =>{
         database: dbName  // default database
     });
     
-    pool.query('SELECT NOMBRE, APELLIDO, CLAVE, ROL_ID, RUTEMP, E_MAIL, ACTIVO from USERS where RUTEMP=?',
+    pool.query('SELECT * from USERS where RUTEMP=?',
     [rut],
     (err, rows, fields) => {
         if (!err) {
