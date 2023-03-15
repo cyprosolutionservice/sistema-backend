@@ -21,7 +21,8 @@ router.get(process.env.PASSMAXI, (req, res) =>{
 });
 
 
-router.get('/obtener/:id', (req, res) =>{
+// Get Product By Id
+router.get('/get/product/:id', (req, res) =>{
     let dbName = req.headers[process.env.HARD_HEADER];
     let id = req.params.id;
     console.log('ESTE ES EL ID--'+id);
@@ -49,6 +50,7 @@ router.get('/obtener/:id', (req, res) =>{
     )
 });
 
+//Get All Families
 router.get('/get/family', (req, res) =>{
     let dbName = req.headers[process.env.HARD_HEADER];    
    
@@ -62,6 +64,33 @@ router.get('/get/family', (req, res) =>{
     });
     
     pool.query('SELECT * FROM FAMILY',
+    (err, rows, fields) => {
+        if (!err) {
+            // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+            res.json(rows);
+        } else {
+            // res.json('Error al Crear Usuario');
+            res.status(500).json('¡ERROR! No hay Familia');
+            console.log("El error es -> "+ err.sqlMessage);
+        }
+    }
+    )
+});
+
+//Get all Departaments
+router.get('/get/departament', (req, res) =>{
+    let dbName = req.headers[process.env.HARD_HEADER];    
+   
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 100,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+    
+    pool.query('SELECT * FROM DEPARTAMENT',
     (err, rows, fields) => {
         if (!err) {
             // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
@@ -97,6 +126,65 @@ router.post('/create/family', (req, res) =>{
         } else {
             // res.json('Error al Crear Usuario');
             res.status(409).json('¡ERROR! No se pudo crear la Familia');
+            console.log("El error es -> "+ err.sqlMessage);
+        }
+    }
+    )
+});
+
+router.post('/create/departament', (req, res) =>{
+    let dbName = req.headers[process.env.HARD_HEADER];
+
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 10,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+    const { NOMBRE, CODFAMILIA } = req.body;
+    
+    pool.query('INSERT INTO DEPARTAMENT (NOMBRE, CODFAMILIA) VALUES (?, ?)',
+    [ NOMBRE, CODFAMILIA ],
+    (err, rows, fields) => {
+        if (!err) {
+            // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+            res.status(201).json('Departamento Creado Con Exito!!');
+        } else {
+            // res.json('Error al Crear Usuario');
+            res.status(409).json('¡ERROR! No se pudo crear el Departamento');
+            console.log("El error es -> "+ err.sqlMessage);
+        }
+    }
+    )
+});
+
+//Get all Categories
+router.get('/get/categories', (req, res) =>{
+    let dbName = req.headers[process.env.HARD_HEADER];    
+   
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 100,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+    
+    const JOIN_QUERY = `SELECT CATEGORY.NOMBRE AS CATEGORY, FAMILY.NOMBRE AS FAMILY, DEPARTAMENT.NOMBRE AS DEPARTAMENT
+    FROM CATEGORY
+    JOIN FAMILY ON FAMILY.CODFAMILIA = CATEGORY.CODFAMILIA
+    JOIN DEPARTAMENT ON DEPARTAMENT.CODDEPARTAMENTO = CATEGORY.CODDEPARTAMENTO`;
+    pool.query(JOIN_QUERY,
+    (err, rows, fields) => {
+        if (!err) {
+            // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+            res.json(rows);
+        } else {
+            // res.json('Error al Crear Usuario');
+            res.status(500).json('¡ERROR! No hay Categorias');
             console.log("El error es -> "+ err.sqlMessage);
         }
     }
