@@ -252,5 +252,30 @@ function verifyToken(req, res, next){
     }
 }
 
+router.get('/v1/get/roles', (req, res) =>{
+    let dbName = req.headers[process.env.HARD_HEADER];
+
+    const pool = mysql.createPool({
+        connectionLimit: 100,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+    
+    pool.query('SELECT ROL_ID FROM ROLUSERS',
+    (err, rows, fields) => {
+        if (!err) {
+            // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+            res.json(rows);
+        } else {
+            // res.json('Error al Crear Usuario');
+            res.status(500).json('¡ERROR! No hay Usuarios para Mostrar');
+            console.log("El error es -> "+ err.sqlMessage);
+        }
+    }
+    )
+});
+
 
 module.exports = router;

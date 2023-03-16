@@ -89,8 +89,12 @@ router.get('/get/departament', (req, res) =>{
         password: process.env.PWDATA,
         database: dbName  // default database
     });
+
+    const JOIN_QUERY = `SELECT DEPARTAMENT.NOMBRE , FAMILY.NOMBRE AS FAMILY
+    FROM DEPARTAMENT
+    JOIN FAMILY ON FAMILY.CODFAMILIA = DEPARTAMENT.CODFAMILIA`
     
-    pool.query('SELECT * FROM DEPARTAMENT',
+    pool.query(JOIN_QUERY,
     (err, rows, fields) => {
         if (!err) {
             // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
