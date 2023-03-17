@@ -90,7 +90,7 @@ router.get('/get/departament', (req, res) =>{
         database: dbName  // default database
     });
 
-    const JOIN_QUERY = `SELECT DEPARTAMENT.NOMBRE , FAMILY.NOMBRE AS FAMILY
+    const JOIN_QUERY = `SELECT DEPARTAMENT.NOMBRE , FAMILY.NOMBRE AS FAMILY, CODDEPARTAMENTO
     FROM DEPARTAMENT
     JOIN FAMILY ON FAMILY.CODFAMILIA = DEPARTAMENT.CODFAMILIA`
     
@@ -189,6 +189,35 @@ router.get('/get/categories', (req, res) =>{
         } else {
             // res.json('Error al Crear Usuario');
             res.status(500).json('¡ERROR! No hay Categorias');
+            console.log("El error es -> "+ err.sqlMessage);
+        }
+    }
+    )
+});
+
+//create Category
+router.post('/create/category', (req, res) =>{
+    let dbName = req.headers[process.env.HARD_HEADER];
+
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 10,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+    const { NOMBRE, CODFAMILIA, CODDEPARTAMENTO} = req.body;
+    
+    pool.query('INSERT INTO CATEGORY (NOMBRE, CODFAMILIA, CODDEPARTAMENTO) VALUES (?, ?, ?)',
+    [ NOMBRE, CODFAMILIA, CODDEPARTAMENTO ],
+    (err, rows, fields) => {
+        if (!err) {
+            // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+            res.status(201).json('Categoria Creada Con Exito!!');
+        } else {
+            // res.json('Error al Crear Usuario');
+            res.status(409).json('¡ERROR! No se pudo crear la Categoria');
             console.log("El error es -> "+ err.sqlMessage);
         }
     }
