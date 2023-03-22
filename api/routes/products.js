@@ -28,7 +28,7 @@ router.get('/get/product/:id', (req, res) =>{
     console.log('ESTE ES EL ID--'+id);
     // Create connection pool for MySQL
     const pool = mysql.createPool({
-        connectionLimit: 100,
+        connectionLimit: 1000,
         host: process.env.HOST,
         user: process.env.USER,
         password: process.env.PWDATA,
@@ -56,7 +56,7 @@ router.get('/get/family', (req, res) =>{
    
     // Create connection pool for MySQL
     const pool = mysql.createPool({
-        connectionLimit: 100,
+        connectionLimit: 1000,
         host: process.env.HOST,
         user: process.env.USER,
         password: process.env.PWDATA,
@@ -83,7 +83,7 @@ router.get('/get/departament', (req, res) =>{
    
     // Create connection pool for MySQL
     const pool = mysql.createPool({
-        connectionLimit: 100,
+        connectionLimit: 1000,
         host: process.env.HOST,
         user: process.env.USER,
         password: process.env.PWDATA,
@@ -113,7 +113,7 @@ router.post('/create/family', (req, res) =>{
 
     // Create connection pool for MySQL
     const pool = mysql.createPool({
-        connectionLimit: 10,
+        connectionLimit: 1000,
         host: process.env.HOST,
         user: process.env.USER,
         password: process.env.PWDATA,
@@ -141,7 +141,7 @@ router.post('/create/departament', (req, res) =>{
 
     // Create connection pool for MySQL
     const pool = mysql.createPool({
-        connectionLimit: 10,
+        connectionLimit: 1000,
         host: process.env.HOST,
         user: process.env.USER,
         password: process.env.PWDATA,
@@ -170,7 +170,7 @@ router.get('/get/categories', (req, res) =>{
    
     // Create connection pool for MySQL
     const pool = mysql.createPool({
-        connectionLimit: 100,
+        connectionLimit: 1000,
         host: process.env.HOST,
         user: process.env.USER,
         password: process.env.PWDATA,
@@ -201,7 +201,7 @@ router.post('/create/category', (req, res) =>{
 
     // Create connection pool for MySQL
     const pool = mysql.createPool({
-        connectionLimit: 10,
+        connectionLimit: 1000,
         host: process.env.HOST,
         user: process.env.USER,
         password: process.env.PWDATA,
@@ -218,6 +218,37 @@ router.post('/create/category', (req, res) =>{
         } else {
             // res.json('Error al Crear Usuario');
             res.status(409).json('¡ERROR! No se pudo crear la Categoria');
+            console.log("El error es -> "+ err.sqlMessage);
+        }
+    }
+    )
+});
+
+//Get Departaments By Category
+router.get('/get/departament/by/family', (req, res) =>{
+    let dbName = req.headers[process.env.HARD_HEADER];
+    let codCategory = req.headers['cod-family']; 
+   
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 1000,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+
+    const JOIN_QUERY = `SELECT DEPARTAMENT.NOMBRE, DEPARTAMENT.CODDEPARTAMENTO FROM DEPARTAMENT
+    JOIN FAMILY ON FAMILY.CODFAMILIA = DEPARTAMENT.CODFAMILIA
+    WHERE DEPARTAMENT.CODFAMILIA =${codCategory}`
+    
+    pool.query(JOIN_QUERY,
+    (err, rows, fields) => {
+        if (!err) {
+            res.json(rows);
+        } else {
+            // res.json('Error al Crear Usuario');
+            res.status(500).json('¡ERROR! No hay Departamento');
             console.log("El error es -> "+ err.sqlMessage);
         }
     }
