@@ -63,7 +63,7 @@ router.get('/get/family', (req, res) =>{
         database: dbName  // default database
     });
     
-    pool.query('SELECT * FROM FAMILY',
+    pool.query('SELECT * FROM FAMILY ORDER BY FAMILY.NOMBRE',
     (err, rows, fields) => {
         if (!err) {
             // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
@@ -180,7 +180,8 @@ router.get('/get/categories', (req, res) =>{
     const JOIN_QUERY = `SELECT CATEGORY.NOMBRE AS CATEGORY, FAMILY.NOMBRE AS FAMILY, DEPARTAMENT.NOMBRE AS DEPARTAMENT
     FROM CATEGORY
     JOIN FAMILY ON FAMILY.CODFAMILIA = CATEGORY.CODFAMILIA
-    JOIN DEPARTAMENT ON DEPARTAMENT.CODDEPARTAMENTO = CATEGORY.CODDEPARTAMENTO`;
+    JOIN DEPARTAMENT ON DEPARTAMENT.CODDEPARTAMENTO = CATEGORY.CODDEPARTAMENTO
+    ORDER BY FAMILY.NOMBRE`;
     pool.query(JOIN_QUERY,
     (err, rows, fields) => {
         if (!err) {
@@ -240,7 +241,8 @@ router.get('/get/departament/by/family', (req, res) =>{
 
     const JOIN_QUERY = `SELECT DEPARTAMENT.NOMBRE, DEPARTAMENT.CODDEPARTAMENTO FROM DEPARTAMENT
     JOIN FAMILY ON FAMILY.CODFAMILIA = DEPARTAMENT.CODFAMILIA
-    WHERE DEPARTAMENT.CODFAMILIA =${codCategory}`
+    WHERE DEPARTAMENT.CODFAMILIA =${codCategory}
+    ORDER BY DEPARTAMENT.NOMBRE`
     
     pool.query(JOIN_QUERY,
     (err, rows, fields) => {
