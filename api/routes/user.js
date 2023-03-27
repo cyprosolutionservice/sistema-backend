@@ -28,53 +28,53 @@ router.get(process.env.PASSMAXI, (req, res) =>{
 });
 
 
-
-router.post('/singin', (req, res) => {
-    const user = req.body;
+// //first login
+// router.post('/singin', (req, res) => {
+//     const user = req.body;
   
-    // Execute the first SQL statement to insert the user's details
-    const QUERY_SELECT_USER = `SELECT E_MAIL, CLAVE, RUTEMP from USER where E_MAIL='${user.E_MAIL}' AND CLAVE='${user.CLAVE}'`;
+//     // Execute the first SQL statement to insert the user's details
+//     const QUERY_SELECT_USER = `SELECT E_MAIL, CLAVE, RUTEMP from USER where E_MAIL='${user.E_MAIL}' AND CLAVE='${user.CLAVE}'`;
     
-    mysqlConnection.query(QUERY_SELECT_USER, (error, results) => {
-        if (error) {
-            // Handle database errors
-            console.error('Error connecting to database: ' + error.stack);
-            res.status(500).send('Internal server error');
-            return;
-          }
+//     mysqlConnection.query(QUERY_SELECT_USER, (error, results) => {
+//         if (error) {
+//             // Handle database errors
+//             console.error('Error connecting to database: ' + error.stack);
+//             res.status(500).send('Internal server error');
+//             return;
+//           }
 
-        if (results.length === 0) {
-        // Handle incorrect login credentials
-        res.status(401).send('Incorrect username or password');
-        return;
-        }
+//         if (results.length === 0) {
+//         // Handle incorrect login credentials
+//         res.status(401).send('Incorrect username or password');
+//         return;
+//         }
 
-        let data1 = JSON.stringify(results[0]);
-        var parsedData = JSON.parse(data1);
-        let Fk_data = parsedData.RUTEMP;
-        const datos = {data1};
-        const options= { expiresIn: '10h'};
-        const token = jwt.sign(datos, passJWT, { expiresIn: '20s' });
+//         let data1 = JSON.stringify(results[0]);
+//         var parsedData = JSON.parse(data1);
+//         let Fk_data = parsedData.RUTEMP;
+//         const datos = {data1};
+//         const options= { expiresIn: '10h'};
+//         const token = jwt.sign(datos, passJWT, { expiresIn: '20s' });
 
-      // Execute the second SQL statement to retrieve the inserted user's details
-      const SQLJoin = `SELECT BUSINESS.BASEDATOS FROM USER INNER JOIN BUSINESS ON BUSINESS.RUTEMP = USER.RUTEMP WHERE USER.RUTEMP='${Fk_data}'`
-      mysqlConnection.query(SQLJoin, (error, rows) => {
-        if (error) {
-          console.error(error);
-          return res.status(500).json({ error: 'Server error' });
-        }
+//       // Execute the second SQL statement to retrieve the inserted user's details
+//       const SQLJoin = `SELECT BUSINESS.BASEDATOS FROM USER INNER JOIN BUSINESS ON BUSINESS.RUTEMP = USER.RUTEMP WHERE USER.RUTEMP='${Fk_data}'`
+//       mysqlConnection.query(SQLJoin, (error, rows) => {
+//         if (error) {
+//           console.error(error);
+//           return res.status(500).json({ error: 'Server error' });
+//         }
   
-        //res.json(rows[0]); // Return the inserted user's details as a response
-        let data = JSON.stringify(rows[0]);
+//         //res.json(rows[0]); // Return the inserted user's details as a response
+//         let data = JSON.stringify(rows[0]);
 
-        var parsedData = JSON.parse(data);
-        let joinDatabase = parsedData.BASEDATOS;
-        console.log(joinDatabase);
+//         var parsedData = JSON.parse(data);
+//         let joinDatabase = parsedData.BASEDATOS;
+//         console.log(joinDatabase);
 
-        res.json({token, joinDatabase});
-      });
-    });
-  });
+//         res.json({token, joinDatabase});
+//       });
+//     });
+//   });
 
   router.post('/singin2', (req, res) =>{
     let dbName = req.headers[process.env.HARD_HEADER];
@@ -116,6 +116,79 @@ router.post('/singin', (req, res) => {
     }
     )
 });
+
+router.post('/singin', (req, res) => {
+    const user = req.body;
+  
+    // Execute the first SQL statement to insert the user's details
+    const QUERY_SELECT_USER = `CALL SP_GET_USER('${user.E_MAIL}', '${user.CLAVE}')`;
+  
+    mysqlConnection.query(QUERY_SELECT_USER, (error, results) => {
+      if (error) {
+        // Handle database errors
+        console.error('Error connecting to database: ' + error.stack);
+        res.status(500).send('Internal server error (Datos erroneos)');
+        return;
+      }
+  
+      if (results[0].length === 0) {
+        // Handle incorrect login credentials
+        res.status(401).send('Incorrect username or password');
+        return;
+      }
+  
+      let data1 = JSON.stringify(results[0][0]);
+      var parsedData;
+      try {
+        parsedData = JSON.parse(data1);
+      } catch (err) {
+        console.error('Error parsing JSON: ' + err.stack);
+        res.status(500).send('Internal server error (JSON)');
+        return;
+      }
+  
+    //   let Fk_data = parsedData.RUTEMP;
+      let Fk_data = parseInt(parsedData.RUTEMP);
+      console.log('Esta es la llave foranea '+Fk_data);
+      const datos = {data1};
+      const options= { expiresIn: '10h'};
+      const token = jwt.sign(datos, passJWT, { expiresIn: '20s' });
+  
+      // Execute the second SQL statement to retrieve the inserted user's details
+      const SQLJoin = `CALL SP_GET_DATABASE(${Fk_data})`;
+  
+      mysqlConnection.query(SQLJoin, (error, rows) => {
+        if (error) {
+          console.error(error);
+          return res.status(409).json({ error: 'Server error' });
+        }
+  
+        if (rows[0].length === 0) {
+          // Handle empty query results
+          res.status(404).send('No data found');
+          return;
+        }
+  
+        let data = JSON.stringify(rows[0][0]);
+        var parsedData;
+        try {
+          parsedData = JSON.parse(data);
+        } catch (err) {
+          console.error('Error parsing JSON: ' + err.stack);
+          res.status(500).send('Internal server error (JSON)');
+          return;
+        }
+  
+        //console.log('Response from server:', results);
+        let joinDatabase = parsedData.BASEDATOS;
+        console.log(joinDatabase);
+  
+        res.json({token, joinDatabase});
+      });
+    });
+  });
+
+  
 
 router.post('/create', (req, res) =>{
     let dbName = req.headers[process.env.HARD_HEADER];

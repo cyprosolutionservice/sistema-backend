@@ -40,7 +40,7 @@ router.get('/get/product/:id', (req, res) =>{
     (err, rows, fields) => {
         if (!err) {
             // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
-            res.json(rows);
+            res.json(rows);create
         } else {
             // res.json('Error al Crear Usuario');
             res.status(500).json('¡ERROR! No hay Producto');
@@ -90,15 +90,13 @@ router.get('/get/departament', (req, res) =>{
         database: dbName  // default database
     });
 
-    const JOIN_QUERY = `SELECT DEPARTAMENT.NOMBRE , FAMILY.NOMBRE AS FAMILY, CODDEPARTAMENTO
-    FROM DEPARTAMENT
-    JOIN FAMILY ON FAMILY.CODFAMILIA = DEPARTAMENT.CODFAMILIA`
+    const CALL_PROCEDURE = `CALL GetDepartments()`;
     
-    pool.query(JOIN_QUERY,
+    pool.query(CALL_PROCEDURE,
     (err, rows, fields) => {
         if (!err) {
             // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
-            res.json(rows);
+            res.json(rows[0]);
         } else {
             // res.json('Error al Crear Usuario');
             res.status(500).json('¡ERROR! No hay Producto');
@@ -256,6 +254,96 @@ router.get('/get/departament/by/family', (req, res) =>{
     }
     )
 });
+
+//Get Categories By Departaments
+router.get('/get/categories/by/departaments', (req, res) =>{
+    let dbName = req.headers[process.env.HARD_HEADER];
+    let codDepa = req.headers['cod-depa']; 
+
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 1000,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+
+    const CALL_PROCEDURE = `CALL getCategoriesByDepartment(${codDepa})`;
+    
+    pool.query(CALL_PROCEDURE,
+    (err, rows, fields) => {
+        if (!err) {
+            const categories = rows[0];
+            res.json(categories);
+        } else {
+            // res.json('Error al Crear Usuario');
+            res.status(500).json('¡ERROR! No hay Categorias');
+            console.log("El error es -> "+ err.sqlMessage);
+        }
+    }
+    )
+});
+
+router.post('/create/product', (req, res) => {
+    let dbName = req.headers[process.env.HARD_HEADER];
+
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 1000,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+
+    const { CODPRODUCTO, CODPRODTEC, DESCRIPCION, UNIDAD, TIPOA, CODFAMILIA, CODDEPTO, CODCATEGORIA} = req.body;
+    
+    pool.query(
+        'CALL createProduct(?, ?, ?, ?, ?, ?, ?, ?)',
+        [CODPRODUCTO, CODPRODTEC, DESCRIPCION, UNIDAD, TIPOA, CODFAMILIA, CODDEPTO, CODCATEGORIA],
+        (err, rows, fields) => {
+            if (!err) {
+                res.status(201).json('Articulo Creado Con Exito!!');
+            } else {
+                res.status(409).json('¡ERROR! No se pudo crear el Articulo');
+                console.log("El error es -> "+ err.sqlMessage);
+            }
+        }
+    );
+});
+
+
+
+//Get All Products
+router.get('/get/products', (req, res) =>{
+    let dbName = req.headers[process.env.HARD_HEADER];
+   
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 1000,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+
+    const CALL_PROCEDURE = `CALL getProducts()`;
+    
+    pool.query(CALL_PROCEDURE,
+        (err, rows, fields) => {
+            if (!err) {
+                // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+                res.json(rows[0]);
+            } else {
+                // res.json('Error al Crear Usuario');
+                res.status(500).json('¡ERROR! No hay Producto');
+                console.log("El error es -> "+ err.sqlMessage);
+            }
+        }
+        )
+    });
+
 
 
 module.exports = router;
