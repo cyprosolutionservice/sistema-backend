@@ -328,7 +328,8 @@ router.get('/get/products', (req, res) =>{
         database: dbName  // default database
     });
 
-    const CALL_PROCEDURE = `CALL getProducts()`;
+    const codLista = '01P'
+    const CALL_PROCEDURE = `CALL GetProductsWithPrice('${codLista}')`;
     
     pool.query(CALL_PROCEDURE,
         (err, rows, fields) => {
