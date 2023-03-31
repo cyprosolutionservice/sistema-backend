@@ -345,6 +345,33 @@ router.get('/get/products', (req, res) =>{
         )
     });
 
+//Get All PRICELIST
+router.get('/get/pricelist', (req, res) =>{
+    let dbName = req.headers[process.env.HARD_HEADER];
+   
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 1000,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+    
+    pool.query("SELECT * FROM PRICELIST",
+        (err, rows, fields) => {
+            if (!err) {
+                // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+                res.json(rows);
+            } else {
+                // res.json('Error al Crear Usuario');
+                res.status(500).json('¡ERROR! No hay Producto');
+                console.log("El error es -> "+ err.sqlMessage);
+            }
+        }
+        )
+    });
+
 
 
 module.exports = router;
