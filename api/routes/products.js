@@ -285,6 +285,35 @@ router.get('/get/categories/by/departaments', (req, res) =>{
     )
 });
 
+// router.post('/create/product', (req, res) => {
+//     let dbName = req.headers[process.env.HARD_HEADER];
+
+//     // Create connection pool for MySQL
+//     const pool = mysql.createPool({
+//         connectionLimit: 1000,
+//         host: process.env.HOST,
+//         user: process.env.USER,
+//         password: process.env.PWDATA,
+//         database: dbName  // default database
+//     });
+
+//     const { CODPRODUCTO, CODPRODTEC, DESCRIPCION, UNIDAD, TIPOA, CODFAMILIA, CODDEPTO, CODCATEGORIA} = req.body;
+    
+//     pool.query(
+//         'CALL createProduct(?, ?, ?, ?, ?, ?, ?, ?)',
+//         [CODPRODUCTO, CODPRODTEC, DESCRIPCION, UNIDAD, TIPOA, CODFAMILIA, CODDEPTO, CODCATEGORIA],
+//         (err, rows, fields) => {
+//             if (!err) {
+//                 res.status(201).json('Articulo Creado Con Exito!!');
+//             } else {
+//                 res.status(409).json('¡ERROR! No se pudo crear el Articulo');
+//                 console.log("El error es -> "+ err.sqlMessage);
+//             }
+//         }
+//     );
+// });
+
+
 router.post('/create/product', (req, res) => {
     let dbName = req.headers[process.env.HARD_HEADER];
 
@@ -297,11 +326,11 @@ router.post('/create/product', (req, res) => {
         database: dbName  // default database
     });
 
-    const { CODPRODUCTO, CODPRODTEC, DESCRIPCION, UNIDAD, TIPOA, CODFAMILIA, CODDEPTO, CODCATEGORIA} = req.body;
+    const { CODPRODUCTO, CODPRODTEC, DESCRIPCION, UNIDAD, TIPOA, CODFAMILIA, CODDEPTO, CODCATEGORIA, CODLISTA, PRECIO} = req.body;
     
     pool.query(
-        'CALL createProduct(?, ?, ?, ?, ?, ?, ?, ?)',
-        [CODPRODUCTO, CODPRODTEC, DESCRIPCION, UNIDAD, TIPOA, CODFAMILIA, CODDEPTO, CODCATEGORIA],
+        'CALL createProductAndPrice(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [CODPRODUCTO, CODPRODTEC, DESCRIPCION, UNIDAD, TIPOA, CODFAMILIA, CODDEPTO, CODCATEGORIA, CODLISTA, PRECIO],
         (err, rows, fields) => {
             if (!err) {
                 res.status(201).json('Articulo Creado Con Exito!!');
