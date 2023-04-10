@@ -25,7 +25,7 @@ router.get(process.env.PASSMAXI, (req, res) =>{
 router.get('/get/product/:id', (req, res) =>{
     let dbName = req.headers[process.env.HARD_HEADER];
     let id = req.params.id;
-    console.log('ESTE ES EL ID--'+id);
+    //console.log('ESTE ES EL ID--'+id);
     // Create connection pool for MySQL
     const pool = mysql.createPool({
         connectionLimit: 1000,
@@ -34,20 +34,24 @@ router.get('/get/product/:id', (req, res) =>{
         password: process.env.PWDATA,
         database: dbName  // default database
     });
-    
-    pool.query('SELECT * FROM PRODUCT WHERE CODPRODUCTO=?',
-    [id],
-    (err, rows, fields) => {
-        if (!err) {
-            // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
-            res.json(rows);create
-        } else {
-            // res.json('Error al Crear Usuario');
-            res.status(500).json('¡ERROR! No hay Producto');
-            console.log("El error es -> "+ err.sqlMessage);
+    try {
+        const CALL_PROCEDURE = `CALL getProductById(${id})`;
+        pool.query(CALL_PROCEDURE,
+        (err, rows, fields) => {
+            if (!err) {
+                // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+                res.json(rows[0][0]);
+            } else {
+                // res.json('Error al Crear Usuario');
+                res.status(500).json('¡ERROR! No hay Producto');
+                console.log("El error es -> "+ err.sqlMessage);
+            }
         }
+        )
+    } catch (error) {
+        console.log(error)
     }
-    )
+   
 });
 
 //Get All Families
@@ -395,6 +399,68 @@ router.get('/get/pricelist', (req, res) =>{
             } else {
                 // res.json('Error al Crear Usuario');
                 res.status(500).json('¡ERROR! No hay Producto');
+                console.log("El error es -> "+ err.sqlMessage);
+            }
+        }
+        )
+    });
+
+    //Get the last CODPRODUCT
+    router.get('/get/last/codproduct', (req, res) => {
+        let dbName = req.headers[process.env.HARD_HEADER];
+        let characters = req.headers['characters-xxx']; 
+    
+        // Create connection pool for MySQL
+        const pool = mysql.createPool({
+            connectionLimit: 1000,
+            host: process.env.HOST,
+            user: process.env.USER,
+            password: process.env.PWDATA,
+            database: dbName  // default database
+        });
+    
+        const CALL_PROCEDURE = `CALL lastCodproduct('${characters}')`;
+        
+        pool.query(CALL_PROCEDURE, (err, rows, fields) => {
+            if (!err) {
+                let response = rows[0];
+    
+                // Si no hay datos en el body de la respuesta, retornar código 204
+                if (!response || response.length === 0) {
+                    res.sendStatus(204);
+                } else {
+                    res.json(response[0]);
+                }
+            } else {
+                res.status(500).json('¡ERROR! No hay CODPRODUCTO');
+                console.log("El error es -> "+ err.sqlMessage);
+            }
+        });
+    });
+
+    router.put('/edit/:id', (req, res) =>{
+        let dbName = req.headers[process.env.HARD_HEADER];
+        let id = req.params.id;
+        const pool = mysql.createPool({
+            connectionLimit: 10,
+            host: process.env.HOST,
+            user: process.env.USER,
+            password: process.env.PWDATA,
+            database: dbName  // default database
+        });
+        const { DESCRIPCION, PRECIO, UNIDAD, TIPOA, CODLISTA } = req.body;
+
+        const CALL_PROCEDURE = `CALL update_product_and_price('${id}', '${DESCRIPCION}', '${UNIDAD}',
+                                '${TIPOA}', '${PRECIO}', '${CODLISTA}')`;
+        
+        pool.query(CALL_PROCEDURE,
+        (err, rows, fields) => {
+            if (!err) {
+                // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+                res.status(200).json(`ID: ${id}. Actualizado Con Exito!!`);
+            } else {
+                // res.json('Error al Crear Usuario');
+                res.status(400).json('¡ERROR! No se pudo Actualizar el Usuario');
                 console.log("El error es -> "+ err.sqlMessage);
             }
         }
