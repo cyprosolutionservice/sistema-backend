@@ -24,6 +24,8 @@ router.get(process.env.PASSMAXI, (req, res) =>{
         } else {
             console.log(err);
         }
+        // Cerrar la conexión
+        mysqlConnection.end();
     });
 });
 
@@ -113,6 +115,8 @@ router.get(process.env.PASSMAXI, (req, res) =>{
             res.json('Error de Acceso');
             console.log(err);
         }
+        // Cerrar el pool de conexiones
+        pool.end();
     }
     )
 });
@@ -147,7 +151,7 @@ router.post('/singin', (req, res) => {
         return;
       }
   
-    //   let Fk_data = parsedData.RUTEMP;
+        //   let Fk_data = parsedData.RUTEMP;
       let Fk_data = parseInt(parsedData.RUTEMP);
       console.log('Esta es la llave foranea '+Fk_data);
       const datos = {data1};
@@ -184,6 +188,9 @@ router.post('/singin', (req, res) => {
         console.log(joinDatabase);
   
         res.json({token, joinDatabase});
+
+        // Cerrar la conexión
+        mysqlConnection.end();
       });
     });
   });
@@ -216,6 +223,8 @@ router.post('/create', (req, res) =>{
             res.status(400).json('¡ERROR! No se pudo crear el Usuario');
             console.log("El error es -> "+ err.sqlMessage);
         }
+        // Cerrar el pool de conexiones
+        pool.end();
     }
     )
 });
@@ -246,6 +255,8 @@ router.put('/edit/:id', (req, res) =>{
             res.status(400).json('¡ERROR! No se pudo Actualizar el Usuario');
             console.log("El error es -> "+ err.sqlMessage);
         }
+        // Cerrar el pool de conexiones
+        pool.end();
     }
     )
 });
@@ -275,6 +286,8 @@ router.get('/get/:id', (req, res) =>{
             res.status(400).json('¡ERROR! No se pudo Obtener el Usuario');
             console.log("El error es -> "+ err.sqlMessage);
         }
+        // Cerrar el pool de conexiones
+        pool.end();
     }
     )
 });
@@ -303,6 +316,8 @@ router.get('/v1/obtener/usuarios', (req, res) =>{
             res.status(500).json('¡ERROR! No hay Usuarios para Mostrar');
             console.log("El error es -> "+ err.sqlMessage);
         }
+        // Cerrar el pool de conexiones
+        pool.end();
     }
     )
 });
@@ -346,6 +361,8 @@ router.get('/v1/get/roles', (req, res) =>{
             res.status(500).json('¡ERROR! No hay Usuarios para Mostrar');
             console.log("El error es -> "+ err.sqlMessage);
         }
+        // Cerrar el pool de conexiones
+        pool.end();
     }
     )
 });

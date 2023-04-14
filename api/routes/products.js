@@ -17,6 +17,8 @@ router.get(process.env.PASSMAXI, (req, res) =>{
         } else {
             console.log(err);
         }
+        // Cerrar la conexión
+        mysqlConnection.end();
     });
 });
 
@@ -46,7 +48,10 @@ router.get('/get/product/:id', (req, res) =>{
                 res.status(500).json('¡ERROR! No hay Producto');
                 console.log("El error es -> "+ err.sqlMessage);
             }
+            // Cerrar el pool de conexiones
+        pool.end();
         }
+        
         )
     } catch (error) {
         console.log(error)
@@ -77,6 +82,8 @@ router.get('/get/family', (req, res) =>{
             res.status(500).json('¡ERROR! No hay Familia');
             console.log("El error es -> "+ err.sqlMessage);
         }
+        // Cerrar el pool de conexiones
+        pool.end();
     }
     )
 });
@@ -106,6 +113,8 @@ router.get('/get/departament', (req, res) =>{
             res.status(500).json('¡ERROR! No hay Producto');
             console.log("El error es -> "+ err.sqlMessage);
         }
+        // Cerrar el pool de conexiones
+        pool.end();
     }
     )
 });
@@ -134,6 +143,8 @@ router.post('/create/family', (req, res) =>{
             res.status(409).json('¡ERROR! No se pudo crear la Familia');
             console.log("El error es -> "+ err.sqlMessage);
         }
+        // Cerrar el pool de conexiones
+        pool.end();
     }
     )
 });
@@ -162,6 +173,8 @@ router.post('/create/departament', (req, res) =>{
             res.status(409).json('¡ERROR! No se pudo crear el Departamento');
             console.log("El error es -> "+ err.sqlMessage);
         }
+        // Cerrar el pool de conexiones
+        pool.end();
     }
     )
 });
@@ -194,6 +207,8 @@ router.get('/get/categories', (req, res) =>{
             res.status(500).json('¡ERROR! No hay Categorias');
             console.log("El error es -> "+ err.sqlMessage);
         }
+        // Cerrar el pool de conexiones
+        pool.end();
     }
     )
 });
@@ -223,6 +238,8 @@ router.post('/create/category', (req, res) =>{
             res.status(409).json('¡ERROR! No se pudo crear la Categoria');
             console.log("El error es -> "+ err.sqlMessage);
         }
+        // Cerrar el pool de conexiones
+        pool.end();
     }
     )
 });
@@ -255,6 +272,8 @@ router.get('/get/departament/by/family', (req, res) =>{
             res.status(500).json('¡ERROR! No hay Departamento');
             console.log("El error es -> "+ err.sqlMessage);
         }
+        // Cerrar el pool de conexiones
+        pool.end();
     }
     )
 });
@@ -285,6 +304,8 @@ router.get('/get/categories/by/departaments', (req, res) =>{
             res.status(500).json('¡ERROR! No hay Categorias');
             console.log("El error es -> "+ err.sqlMessage);
         }
+        // Cerrar el pool de conexiones
+        pool.end();
     }
     )
 });
@@ -337,11 +358,14 @@ router.post('/create/product', (req, res) => {
         [CODPRODUCTO, CODPRODTEC, DESCRIPCION, UNIDAD, TIPOA, CODFAMILIA, CODDEPTO, CODCATEGORIA, CODLISTA, PRECIO],
         (err, rows, fields) => {
             if (!err) {
+                //console.log(res);
                 res.status(201).json('Articulo Creado Con Exito!!');
             } else {
                 res.status(409).json('¡ERROR! No se pudo crear el Articulo');
                 console.log("El error es -> "+ err.sqlMessage);
             }
+            // Cerrar el pool de conexiones
+        pool.end();
         }
     );
 });
@@ -374,6 +398,8 @@ router.get('/get/products', (req, res) =>{
                 res.status(500).json('¡ERROR! No hay Producto');
                 console.log("El error es -> "+ err.sqlMessage);
             }
+        // Cerrar el pool de conexiones
+        pool.end();
         }
         )
     });
@@ -401,6 +427,8 @@ router.get('/get/pricelist', (req, res) =>{
                 res.status(500).json('¡ERROR! No hay Producto');
                 console.log("El error es -> "+ err.sqlMessage);
             }
+        // Cerrar el pool de conexiones
+        pool.end();
         }
         )
     });
@@ -435,6 +463,8 @@ router.get('/get/pricelist', (req, res) =>{
                 res.status(500).json('¡ERROR! No hay CODPRODUCTO');
                 console.log("El error es -> "+ err.sqlMessage);
             }
+        // Cerrar el pool de conexiones
+        pool.end();
         });
     });
 
@@ -463,6 +493,8 @@ router.get('/get/pricelist', (req, res) =>{
                 res.status(400).json('¡ERROR! No se pudo Actualizar el Usuario');
                 console.log("El error es -> "+ err.sqlMessage);
             }
+        // Cerrar el pool de conexiones
+        pool.end();
         }
         )
     });
