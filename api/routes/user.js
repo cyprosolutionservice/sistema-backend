@@ -144,6 +144,8 @@ router.post('/singin', (req, res) => {
 
         connection.query(QUERY_SELECT_USER, (error, results) => {
 
+            console.log("Este es el primer Login -> "+results);
+            console.log("Este es el primer Login error -> "+error);
             if (error) {
                 // Manejar errores de base de datos
                 console.error('Error conectando a la base de datos: ' + error.stack);

@@ -463,11 +463,11 @@ router.get('/get/products', (req, res) => {
                     res.status(500).json('¡ERROR! No hay Producto');
                     console.log("El error es -> " + err.sqlMessage);
                 }
-            
+
             }
         )
     });
-    });
+});
 
 //Get All PRICELIST
 router.get('/get/pricelist', (req, res) => {
@@ -507,46 +507,47 @@ router.get('/get/pricelist', (req, res) => {
 
 //Get the last CODPRODUCT
 router.get('/get/last/codproduct', (req, res) => {
-let dbName = req.headers[process.env.HARD_HEADER];
-let characters = req.headers['characters-xxx'];
+    let dbName = req.headers[process.env.HARD_HEADER];
+    let characters = req.headers['characters-xxx'];
 
-// Create connection pool for MySQL
-const pool = mysql.createPool({
-    connectionLimit: 1000,
-    host: process.env.HOST,
-    user: process.env.USER,
-    password: process.env.PWDATA,
-    database: dbName  // default database
-});
-
-// Obtener una conexión del pool
-pool.getConnection((err, connection) => {
-    if (err) {
-        console.log(err);
-        return res.json('Error de Acceso');
-    }
-
-    const CALL_PROCEDURE = `CALL lastCodproduct('${characters}')`;
-
-    connection.query(CALL_PROCEDURE, (err, rows, fields) => {
-        //Release Pool
-        connection.release();
-        if (!err) {
-            let response = rows[0];
-
-            // Si no hay datos en el body de la respuesta, retornar código 204
-            if (!response || response.length === 0) {
-                res.sendStatus(204);
-            } else {
-                res.json(response[0]);
-            }
-        } else {
-            res.status(500).json('¡ERROR! No hay CODPRODUCTO');
-            console.log("El error es -> " + err.sqlMessage);
-        }
-        
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 1000,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
     });
-});
+
+    // Obtener una conexión del pool
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.log(err);
+            return res.json('Error de Acceso');
+        }
+
+        const CALL_PROCEDURE = `CALL lastCodproduct('${characters}')`;
+
+        connection.query(CALL_PROCEDURE, (err, rows, fields) => {
+            //Release Pool
+            connection.release();
+            if (!err) {
+                let response = rows[0];
+
+                // Si no hay datos en el body de la respuesta, retornar código 204
+                if (!response || response.length === 0) {
+                    res.sendStatus(204);
+                } else {
+                    res.json(response[0]);
+                }
+            } else {
+                res.status(500).json('¡ERROR! No hay CODPRODUCTO');
+                console.log("El error es -> " + err.sqlMessage);
+            }
+
+
+        });
+    });
 });
 
 router.put('/edit/:id', (req, res) => {
@@ -566,25 +567,25 @@ router.put('/edit/:id', (req, res) => {
             console.log(err);
             return res.json('Error de Acceso');
         }
-    const { DESCRIPCION, PRECIO, UNIDAD, TIPOA, CODLISTA } = req.body;
+        const { DESCRIPCION, PRECIO, UNIDAD, TIPOA, CODLISTA } = req.body;
 
-    const CALL_PROCEDURE = `CALL update_product_and_price('${id}', '${DESCRIPCION}', '${UNIDAD}',
+        const CALL_PROCEDURE = `CALL update_product_and_price('${id}', '${DESCRIPCION}', '${UNIDAD}',
                         '${TIPOA}', '${PRECIO}', '${CODLISTA}')`;
 
-    connection.query(CALL_PROCEDURE,
-        (err, rows, fields) => {
-            //Release Pool
-            connection.release();
-            if (!err) {
-                // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
-                res.status(200).json(`ID: ${id}. Actualizado Con Exito!!`);
-            } else {
-                // res.json('Error al Crear Usuario');
-                res.status(400).json('¡ERROR! No se pudo Actualizar el Usuario');
-                console.log("El error es -> " + err.sqlMessage);
+        connection.query(CALL_PROCEDURE,
+            (err, rows, fields) => {
+                //Release Pool
+                connection.release();
+                if (!err) {
+                    // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+                    res.status(200).json(`ID: ${id}. Actualizado Con Exito!!`);
+                } else {
+                    // res.json('Error al Crear Usuario');
+                    res.status(400).json('¡ERROR! No se pudo Actualizar el Usuario');
+                    console.log("El error es -> " + err.sqlMessage);
+                }
             }
-        }
-    )
+        )
     });
 });
 
@@ -654,13 +655,205 @@ router.get('/get/unidades', (req, res) => {
                     res.json(rows);
                 } else {
                     // res.json('Error al Crear Usuario');
-                    res.status(500).json('¡ERROR! No hay Familia');
+                    res.status(500).json('¡ERROR! No hay Unidades');
                     console.log("El error es -> " + err.sqlMessage);
                 }
             }
         )
     });
 });
+
+
+//Get All MENUBARSALE
+router.get('/get/barsale', (req, res) => {
+    let dbName = req.headers[process.env.HARD_HEADER];
+
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 1000,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+
+    // Obtener una conexión del pool
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.log(err);
+            return res.json('Error de Acceso');
+        }
+
+        connection.query('SELECT * FROM MENUBARSALE',
+            (err, rows, fields) => {
+                //Liberar pool de conexion
+                connection.release();
+                if (!err) {
+                    // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+                    res.json(rows);
+                } else {
+                    // res.json('Error al Crear Usuario');
+                    res.status(500).json('¡ERROR! No hay Elementos');
+                    console.log("El error es -> " + err.sqlMessage);
+                }
+            }
+        )
+    });
+});
+
+//Get Last ID by MENUBARSALE
+router.get('/get/barsale/last', (req, res) => {
+    let dbName = req.headers[process.env.HARD_HEADER];
+
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 1000,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+
+    // Obtener una conexión del pool
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.log(err);
+            return res.json('Error de Acceso');
+        }
+
+        let lastCodMenu;
+        connection.query('SELECT * FROM MENUBARSALE ORDER BY CODMENU DESC LIMIT 1',
+            (err, rows, fields) => {
+                //Liberar pool de conexion
+                connection.release();
+                if (!err) {
+                    // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+                    res.json(rows[0]);
+                    lastCodMenu = rows[0].CODMENU;
+                    console.log("Este es el ultimo CODMENU: " + lastCodMenu);
+                } else {
+                    // res.json('Error al Crear Usuario');
+                    res.status(500).json('¡ERROR! No hay Elementos');
+                    console.log("El error es -> " + err.sqlMessage);
+                }
+            }
+        )
+    });
+});
+
+//Create SECCIONES MENUBARSALE
+router.post('/create/barsale', (req, res) => {
+    let dbName = req.headers[process.env.HARD_HEADER];
+
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 1000,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+
+    // Obtener una conexión del pool
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.log(err);
+            return res.json('Error de Acceso');
+        }
+
+        const { DESCRIPCION } = req.body;
+        const CALL_PROCEDURE = `CALL create_section_barsale('${DESCRIPCION}')`;
+        connection.query(CALL_PROCEDURE,
+            (err, rows, fields) => {
+                //Release Pool
+                connection.release();
+                if (!err) {
+                    //console.log(res);
+                    res.status(201).json('SECCION Creada! -> '+DESCRIPCION);
+                   
+                } else {
+                    res.status(409).json('¡ERROR! No se pudo crear La Seccion');
+                    console.log("El error es -> " + err.sqlMessage);
+                }
+
+
+            });
+    });
+});
+
+//Get All TYPESALE
+router.get('/get/typesale', (req, res) => {
+    let dbName = req.headers[process.env.HARD_HEADER];
+
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 1000,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+
+    // Obtener una conexión del pool
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.log(err);
+            return res.json('Error de Acceso');
+        }
+        connection.query('SELECT * FROM TYPESALE',
+            (err, rows, fields) => {
+                //Liberar pool de conexion
+                connection.release();
+                if (!err) {
+                    // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+                    res.json(rows);
+                } else {
+                    // res.json('Error al Crear Usuario');
+                    res.status(500).json('¡ERROR! No hay Elementos');
+                    console.log("El error es -> " + err.sqlMessage);
+                }
+            }
+        )
+    });
+});
+
+
+//Get SECCIONES
+router.get('/get/secciones', (req, res) => {
+    let dbName = req.headers[process.env.HARD_HEADER];
+
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 1000,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+
+    // Obtener una conexión del pool
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.log(err);
+            return res.json('Error de Acceso');
+        }
+        connection.query('CALL get_secciones()',
+            (err, rows, fields) => {
+                //Liberar pool de conexion
+                connection.release();
+                if (!err) {
+                    // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+                    res.json(rows[0]);
+                } else {
+                    // res.json('Error al Crear Usuario');
+                    res.status(500).json('¡ERROR! No hay Elementos');
+                    console.log("El error es -> " + err.sqlMessage);
+                }
+            }
+        )
+    });
+});
+
 
 
 module.exports = router;
