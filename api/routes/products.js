@@ -854,6 +854,41 @@ router.get('/get/secciones', (req, res) => {
     });
 });
 
+//Get SECCIONES BY TYPESALE
+router.get('/get/secciones/tipos/:id', (req, res) => {
+    let dbName = req.headers[process.env.HARD_HEADER];
+    let id = req.params.id;
+    // Create connection pool for MySQL
+    const pool = mysql.createPool({
+        connectionLimit: 1000,
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PWDATA,
+        database: dbName  // default database
+    });
+
+    // Obtener una conexión del pool
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.log(err);
+            return res.json('Error de Acceso');
+        }
+        connection.query(`CALL section_by_typesale(${id})`,
+            (err, rows, fields) => {
+                //Liberar pool de conexion
+                connection.release();
+                if (!err) {
+                    // console.log(res.statusCode=201, res.json("Usuario Creado Con Exito!!"));
+                    res.json(rows[0]);
+                } else {
+                    // res.json('Error al Crear Usuario');
+                    res.status(500).json('¡ERROR! No hay Elementos');
+                    console.log("El error es -> " + err.sqlMessage);
+                }
+            }
+        )
+    });
+});
 
 
 module.exports = router;
